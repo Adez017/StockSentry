@@ -249,7 +249,8 @@ class StockSentryML:
 
     def train_and_evaluate(self, ticker, start_date="2023-01-01", end_date="2023-06-30"):
         """Complete training and evaluation pipeline"""
-        print(f"🔄 Training models for {ticker}...")
+        if  not hasattr(self,'_streamlit_mode'):
+            print(f"🔄 Training models for {ticker}...")
 
         try:
             # Fetching the  data and preparing  features
@@ -294,14 +295,15 @@ class StockSentryML:
                         self.best_model = ensemble
                         best_model_name = "Ensemble"
 
-
-            print(f"✅ Best model: {best_model_name} (R² = {best_r2:.4f})")
+            if not hasattr(self,'_streamlit_mode'):
+                print(f"✅ Best model: {best_model_name} (R² = {best_r2:.4f})")
 
 
             return self.best_model
 
         except Exception as e:
-            print(f"⚠️  Training failed, using fallback model")
+            if not hasattr(self,'_streamlit_mode'):
+                print(f"⚠️  Training failed, using fallback model")
             # Fallback to simple Simple model
             self.best_model = RandomForestRegressor(n_estimators=100, random_state=42)
             self.best_model.fit(X_train, y_train)
@@ -477,3 +479,8 @@ try:
     plot_actual_vs_predicted(y_test, y_pred)
 except Exception as e:
     print(f"Visualization error: {e}")
+
+    
+def set_streamlit_mode(self):
+    """Enable streamlit mode to suppress print statements"""
+    self._streamlit_mode = True
